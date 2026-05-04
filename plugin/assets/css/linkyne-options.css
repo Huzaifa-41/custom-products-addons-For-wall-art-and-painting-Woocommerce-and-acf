@@ -1,0 +1,267 @@
+.linkyne-option-group { margin-bottom: 25px; }
+.linkyne-option-group h4 { margin-bottom: 10px; font-size: 16px; text-transform: uppercase; }
+
+/* 1. Image Swatch Layout */
+.linkyne-swatches-wrapper.type-image {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+.linkyne-option-group h4 {
+	font-family: lato !important;
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	text-transform: capitalize !important; 
+}
+.linkyne-swatch.swatch-image {
+    cursor: pointer; text-align: center; border: 2px solid transparent;
+    padding: 4px; transition: all 0.2s ease;
+}
+.linkyne-swatch.swatch-image img {
+    width: 100%; height: auto; display: block;
+     margin-bottom: 10px; padding: 5px;
+}
+.linkyne-swatch.swatch-image .swatch-label {
+    display: block; font-size: 16px; line-height: 1.3; color: #000; font-family: lato;
+    white-space: normal !important; word-break: normal !important; overflow-wrap: break-word !important;
+}
+.linkyne-swatch.swatch-image.selected {
+    background-color: #eeeeee; border: 2px solid #000; 	font-weight: 500;
+}
+
+/* 2. Button Swatch Layout */
+.linkyne-swatches-wrapper.type-button {
+    display: grid;
+    /* This creates the uniform grid that stretches to fill the row */
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+.linkyne-swatch.swatch-button {
+    cursor: pointer; 
+    padding: 10px 15px; 
+    border: 1px solid #e0e0e0;
+    background: #fff; 
+    text-align: center; 
+    font-size: 16px;
+	font-family: lato;
+	font-weight: 400;
+    transition: all 0.2s ease; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.linkyne-swatch.swatch-button:hover { 
+    background: #eeeeee; 
+}
+
+/* Updated Selected State: Light Grey background, Black border */
+.linkyne-swatch.swatch-button.selected {
+    background: #eeeeee; 
+    color: #000; 
+    border: 2px solid #000;
+	font-weight: 500;
+    /* We subtract 1px from padding to offset the thicker border, preventing the button from resizing/jumping when clicked */
+    padding: 9px 14px; 
+}
+
+/* --- 3. The CSS Sandwich (Gallery) --- */
+.linkyne-sandwich-wrapper {
+    position: relative; 
+    width: 100%; 
+    /* Aspect-ratio removed so it hugs the image */
+    overflow: hidden; 
+    background: #f7f7f7; 
+}
+.linkyne-mockup-frame {
+    position: relative; /* Changed to relative so it dictates the height natively */
+    width: 100%; height: auto; display: block;
+    z-index: 10; pointer-events: none;
+}
+.linkyne-base-art {
+    position: absolute; z-index: 1; object-fit: cover; 
+}
+
+/* --- 4. CUSTOM STANDALONE SLIDER --- */
+.linkyne-slider-container {
+    position: relative;
+    width: 100%;
+    /* Aspect-ratio removed */
+    overflow: hidden;
+    background: #f7f7f7;
+    border-radius: 4px;
+}
+.linkyne-slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; 
+    /* height: 100% removed */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out;
+}
+.linkyne-slide.active-slide {
+    position: relative; /* This forces the container to perfectly wrap the active image's height */
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+/* Slider Arrows */
+.linkyne-slider-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8); color: #000; border: 1px solid #ddd;
+    width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+    z-index: 10; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease; padding: 20px;
+}
+.linkyne-slider-btn:hover { background: #000; color: #fff; }
+.linkyne-slider-btn.prev-btn { left: 0px; }
+.linkyne-slider-btn.next-btn { right: 0px; }
+
+/* Slider Dots */
+.linkyne-slider-dots {
+    position: absolute; bottom: 15px; width: 100%; text-align: center; z-index: 10;
+}
+.linkyne-dot {
+    display: inline-block; width: 10px; height: 10px; background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%; margin: 0 5px; cursor: pointer; transition: background 0.2s ease;
+}
+.linkyne-dot.active-dot { background: #000; }
+
+/* Prevents layout shift when child options toggle and change page height */
+html {
+    overflow-y: scroll !important;
+}
+
+/* --- PREVENT INTRINSIC WIDTH BLOWOUT --- */
+
+/* 1. Lock all parent containers so they never stretch past the Elementor column */
+.linkyne-global-options-wrapper,
+.linkyne-option-group,
+.linkyne-swatches-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* 2. Force text to wrap inside buttons so long option names don't stretch the grid */
+.linkyne-swatch.swatch-button {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* --- HIDE LABELS CHECKBOX FEATURE --- */
+
+/* Hide the normal text under the image if the checkbox is checked */
+.linkyne-swatches-wrapper.hide-labels-mode .swatch-label {
+    display: none !important;
+}
+
+/* Remove bottom margin from the image so the swatch box hugs it tightly */
+.linkyne-swatches-wrapper.hide-labels-mode .linkyne-swatch.swatch-image img {
+    margin-bottom: 0;
+}
+
+/* Style the text injected into the <h4> title */
+.linkyne-dynamic-title-append {
+    font-weight: 400;
+    color: #666;
+    margin-left: 5px;
+    font-size: 16px;
+    text-transform: none; /* Prevents it from going all-caps if your heading is uppercase */
+}
+
+/* --- 5. ACTION ROW (PRICE & ADD TO CART) --- */
+
+.linkyne-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 15px;
+    gap: 20px; 
+}
+
+/* Make the price large and colored */
+.linkyne-live-price-wrapper {
+    font-size: 30px; 
+    font-weight: 700;
+	font-family: lato;
+    color: black; /* Matches the burnt red/orange in your reference image */
+    line-height: 1;
+}
+
+/* Force WooCommerce currency symbol and decimals to inherit the style */
+.linkyne-live-total .woocommerce-Price-amount {
+    color: inherit;
+    font-weight: inherit;
+}
+
+/* Button Styling */
+.linkyne-cart-btn {
+    flex: 1;
+    max-width: 250px; /* Prevents the button from stretching too far */
+    padding: 16px 20px;
+    background: #333; /* Dark grey matching the reference */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 400;
+    border-radius: 2px;
+    transition: background 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.linkyne-cart-btn:hover {
+    background: #000;
+}
+
+/* Mobile Fallback: Stack them if screen is narrow */
+@media (max-width: 480px) {
+    .linkyne-action-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .linkyne-cart-btn {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* --- RESPONSIVE IMAGE SWATCHES --- */
+@media (max-width: 768px) {
+    .linkyne-swatches-wrapper.type-image {
+        /* Forces the grid to drop from 6 columns to 3 columns on mobile and tablets */
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px; /* Slightly tighter gap for smaller screens */
+    }
+	
+	.linkyne-swatch.swatch-image .swatch-label, .linkyne-swatch.swatch-button {
+		font-size: 14px;
+	}
+}
+
+/* Prevent native ghost dragging on images inside the slider so desktop dragging works smoothly */
+.linkyne-slider-container img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Change cursor to indicate it can be dragged on desktop */
+.linkyne-slider-container {
+    cursor: grab;
+}
+.linkyne-slider-container:active {
+    cursor: grabbing;
+}
