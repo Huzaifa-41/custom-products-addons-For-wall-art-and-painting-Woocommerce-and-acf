@@ -1,10 +1,20 @@
+/* Ensure the gallery provides a locked container for the loader */
+#linkyne-standalone-gallery {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    background: #f7f7f7;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
 .linkyne-option-group { margin-bottom: 25px; }
 .linkyne-option-group h4 { margin-bottom: 10px; font-size: 16px; text-transform: uppercase; }
 
 /* 1. Image Swatch Layout */
 .linkyne-swatches-wrapper.type-image {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(calc((100% - 60px) / 6), 1fr));
     gap: 12px;
 }
 
@@ -33,7 +43,6 @@
 /* 2. Button Swatch Layout */
 .linkyne-swatches-wrapper.type-button {
     display: grid;
-    /* This creates the uniform grid that stretches to fill the row */
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
 }
@@ -58,29 +67,30 @@
     background: #eeeeee; 
 }
 
-/* Updated Selected State: Light Grey background, Black border */
 .linkyne-swatch.swatch-button.selected {
     background: #eeeeee; 
     color: #000; 
     border: 2px solid #000;
 	font-weight: 500;
-    /* We subtract 1px from padding to offset the thicker border, preventing the button from resizing/jumping when clicked */
     padding: 9px 14px; 
 }
 
 /* --- 3. The CSS Sandwich (Gallery) --- */
 .linkyne-sandwich-wrapper {
     position: relative; 
-    width: 100%; 
-    /* Aspect-ratio removed so it hugs the image */
-    overflow: hidden; 
-    background: #f7f7f7; 
+    width: 100%;
+    line-height: 0;
 }
+
 .linkyne-mockup-frame {
-    position: relative; /* Changed to relative so it dictates the height natively */
-    width: 100%; height: auto; display: block;
-    z-index: 10; pointer-events: none;
+    position: relative; 
+    width: 100%; 
+    height: auto; 
+    display: block;
+    z-index: 10; 
+    pointer-events: none;
 }
+
 .linkyne-base-art {
     position: absolute; z-index: 1; object-fit: cover; 
 }
@@ -89,40 +99,37 @@
 .linkyne-slider-container {
     position: relative;
     width: 100%;
-    /* Aspect-ratio removed */
+    /* We removed min-height from here since it's now safely on the parent wrapper! */
     overflow: hidden;
-    background: #f7f7f7;
-    border-radius: 4px;
+    transition: height 0.4s ease-in-out; 
 }
+
 .linkyne-slide {
     position: absolute;
     top: 0; left: 0;
     width: 100%; 
-    /* height: 100% removed */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out;
 }
+
 .linkyne-slide.active-slide {
-    position: relative; /* This forces the container to perfectly wrap the active image's height */
     opacity: 1;
     visibility: visible;
     z-index: 2;
 }
 
-/* Slider Arrows */
 .linkyne-slider-btn {
     position: absolute; top: 50%; transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.8); color: #000; border: 1px solid #ddd;
-    width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+    width: 20px; height: 20px; border-radius: 99px; cursor: pointer; padding: 20px !important;
     z-index: 10; font-size: 18px; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s ease; padding: 20px;
+    transition: all 0.2s ease;
 }
 .linkyne-slider-btn:hover { background: #000; color: #fff; }
 .linkyne-slider-btn.prev-btn { left: 0px; }
 .linkyne-slider-btn.next-btn { right: 0px; }
 
-/* Slider Dots */
 .linkyne-slider-dots {
     position: absolute; bottom: 15px; width: 100%; text-align: center; z-index: 10;
 }
@@ -132,14 +139,10 @@
 }
 .linkyne-dot.active-dot { background: #000; }
 
-/* Prevents layout shift when child options toggle and change page height */
 html {
     overflow-y: scroll !important;
 }
 
-/* --- PREVENT INTRINSIC WIDTH BLOWOUT --- */
-
-/* 1. Lock all parent containers so they never stretch past the Elementor column */
 .linkyne-global-options-wrapper,
 .linkyne-option-group,
 .linkyne-swatches-wrapper {
@@ -148,36 +151,29 @@ html {
     box-sizing: border-box;
 }
 
-/* 2. Force text to wrap inside buttons so long option names don't stretch the grid */
 .linkyne-swatch.swatch-button {
     white-space: normal !important;
     word-break: break-word !important;
     overflow-wrap: break-word !important;
 }
 
-/* --- HIDE LABELS CHECKBOX FEATURE --- */
-
-/* Hide the normal text under the image if the checkbox is checked */
 .linkyne-swatches-wrapper.hide-labels-mode .swatch-label {
     display: none !important;
 }
 
-/* Remove bottom margin from the image so the swatch box hugs it tightly */
 .linkyne-swatches-wrapper.hide-labels-mode .linkyne-swatch.swatch-image img {
     margin-bottom: 0;
 }
 
-/* Style the text injected into the <h4> title */
 .linkyne-dynamic-title-append {
     font-weight: 400;
     color: #666;
     margin-left: 5px;
     font-size: 16px;
-    text-transform: none; /* Prevents it from going all-caps if your heading is uppercase */
+    text-transform: none; 
 }
 
 /* --- 5. ACTION ROW (PRICE & ADD TO CART) --- */
-
 .linkyne-action-row {
     display: flex;
     justify-content: space-between;
@@ -187,27 +183,24 @@ html {
     gap: 20px; 
 }
 
-/* Make the price large and colored */
 .linkyne-live-price-wrapper {
     font-size: 30px; 
     font-weight: 700;
 	font-family: lato;
-    color: black; /* Matches the burnt red/orange in your reference image */
+    color: black; 
     line-height: 1;
 }
 
-/* Force WooCommerce currency symbol and decimals to inherit the style */
 .linkyne-live-total .woocommerce-Price-amount {
     color: inherit;
     font-weight: inherit;
 }
 
-/* Button Styling */
 .linkyne-cart-btn {
     flex: 1;
-    max-width: 250px; /* Prevents the button from stretching too far */
+    max-width: 250px; 
     padding: 16px 20px;
-    background: #333; /* Dark grey matching the reference */
+    background: #333; 
     color: #fff;
     border: none;
     cursor: pointer;
@@ -224,7 +217,6 @@ html {
     background: #000;
 }
 
-/* Mobile Fallback: Stack them if screen is narrow */
 @media (max-width: 480px) {
     .linkyne-action-row {
         flex-direction: column;
@@ -236,12 +228,15 @@ html {
     }
 }
 
-/* --- RESPONSIVE IMAGE SWATCHES --- */
+/* --- RESPONSIVE ADJUSTMENTS --- */
 @media (max-width: 768px) {
+    #linkyne-standalone-gallery {
+        min-height: 200px;
+    }
+
     .linkyne-swatches-wrapper.type-image {
-        /* Forces the grid to drop from 6 columns to 3 columns on mobile and tablets */
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 10px; /* Slightly tighter gap for smaller screens */
+        grid-template-columns: repeat(auto-fit, minmax(30%, 1fr)) !important;
+        gap: 10px; 
     }
 	
 	.linkyne-swatch.swatch-image .swatch-label, .linkyne-swatch.swatch-button {
@@ -249,7 +244,6 @@ html {
 	}
 }
 
-/* Prevent native ghost dragging on images inside the slider so desktop dragging works smoothly */
 .linkyne-slider-container img {
     -webkit-user-drag: none;
     user-select: none;
@@ -258,10 +252,68 @@ html {
     -ms-user-select: none;
 }
 
-/* Change cursor to indicate it can be dragged on desktop */
 .linkyne-slider-container {
     cursor: grab;
 }
 .linkyne-slider-container:active {
     cursor: grabbing;
+}
+
+/* --- 6. LIGHTBOX ZOOM ICON --- */
+.linkyne-zoom-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+    z-index: 60; /* Higher than loader so it stays clickable */
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.linkyne-zoom-icon:hover {
+    background: #333;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* --- 7. GALLERY PRELOADER (GLASSMORPHISM) --- */
+.linkyne-gallery-loader {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px); /* Safari support */
+    z-index: 50; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.linkyne-gallery-loader.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.linkyne-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top: 3px solid #333;
+    border-radius: 50%;
+    animation: linkyne-spin 0.8s linear infinite;
+}
+
+@keyframes linkyne-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
