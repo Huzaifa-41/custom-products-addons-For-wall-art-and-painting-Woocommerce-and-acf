@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Linkyne Global Product Options
  * Description: Advanced custom options, Make.com shape matching, live pricing, and multi-slide gallery mockups.
- * Version: 2.0.1
+ * Version: 2.6.1
  * Author: Linkyne
  * Author URI: https://linkyne.com/
  */
@@ -12,10 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 // 1. Enqueue Scripts (Elementor Pro Safe Method)
 add_action( 'wp_enqueue_scripts', 'linkyne_global_options_assets' );
 function linkyne_global_options_assets() {
-    // is_singular('product') forces it to load on Elementor custom templates
     if ( is_product() || is_singular( 'product' ) ) {
         wp_enqueue_style( 'linkyne-options-css', plugin_dir_url( __FILE__ ) . 'assets/css/linkyne-options.css', array(), '2.0.0' );
         wp_enqueue_script( 'linkyne-options-js', plugin_dir_url( __FILE__ ) . 'assets/js/linkyne-options.js', array( 'jquery' ), '2.0.0', true );
+        
+        // Inject Premium Standalone Lightbox (GLightbox) via CDN
+        wp_enqueue_style( 'glightbox-css', 'https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css', array(), '3.2.0' );
+        wp_enqueue_script( 'glightbox-js', 'https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js', array(), '3.2.0', true );
     }
 }
 
@@ -31,12 +34,40 @@ function linkyne_render_gallery_shortcode() {
     if ( ! $base_image_url ) return '';
 
     ob_start();
-    // This creates a safe, isolated box for our CSS Sandwich
+
+    // --- PREPARE GLIGHTBOX HIDDEN GALLERY ---
+    $main_img_id = $product->get_image_id();
+    $gallery_ids = $product->get_gallery_image_ids();
+    $all_ids = array_merge( array( $main_img_id ), $gallery_ids );
+
+    echo '<div id="linkyne-hidden-lightbox" style="display:none;">';
+    foreach ( $all_ids as $id ) {
+        if ( ! $id ) continue;
+        $img_src = wp_get_attachment_image_src( $id, 'full' );
+        if ( $img_src ) {
+            echo '<a href="' . esc_url($img_src[0]) . '" class="linkyne-glightbox" data-gallery="product-gallery"></a>';
+        }
+    }
+    echo '</div>';
+
+    // THE GALLERY CONTAINER
     echo '<div id="linkyne-standalone-gallery" data-base-image="' . esc_url($base_image_url) . '">';
+    
+    // 1. Zoom Icon (Outside the dynamic area so it's permanent)
+    echo '<div class="linkyne-zoom-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></div>';
+
+    // 2. The Frosted Glass Preloader (Active by default to catch the page load)
+    echo '<div class="linkyne-gallery-loader active"><div class="linkyne-spinner"></div></div>';
+
+    // 3. The Inner Wrapper (Where JS will inject the mockups safely)
+    echo '<div id="linkyne-gallery-inner">';
     echo '<div class="linkyne-sandwich-wrapper default-view">';
     echo '<img class="linkyne-base-art default-art" src="' . esc_url($base_image_url) . '" style="position:relative; width:100%; height:auto; object-fit:contain;">';
     echo '</div>';
-    echo '</div>';
+    echo '</div>'; // End Inner Wrapper
+
+    echo '</div>'; // End Main Wrapper
+    
     return ob_get_clean();
 }
 
@@ -64,23 +95,19 @@ function linkyne_render_options_shortcode() {
             $target_tag     = get_sub_field('target_product_tag');
             $condition      = get_sub_field('conditional_parent_value');
             $display_type   = get_sub_field('display_type') ? get_sub_field('display_type') : 'button';
-            $hide_labels    = get_sub_field('hide_image_labels'); // Grab the new ACF checkbox
+            $hide_labels    = get_sub_field('hide_image_labels');
 
             if ( !empty($target_tag) && !in_array($target_tag, $product_tags) ) { continue; }
             
             echo '<div class="linkyne-option-group" data-group="' . esc_attr($group_name) . '" data-condition="' . esc_attr($condition) . '">';
             
-            // Output Title + Blank Span for JS to inject the name
             echo '<h4>' . esc_html($group_name);
-            if ( $display_type === 'image' && $hide_labels ) {
-                echo '<span class="linkyne-dynamic-title-append"></span>';
-            }
+            if ( $display_type === 'image' && $hide_labels ) { echo '<span class="linkyne-dynamic-title-append"></span>'; }
             echo '</h4>';
 
             echo '<input type="hidden" name="linkyne_options[' . esc_attr($group_name) . ']" class="linkyne-hidden-selection" value="">';
             echo '<input type="hidden" name="linkyne_prices[' . esc_attr($group_name) . ']" class="linkyne-hidden-price" value="0">';
             
-            // Add a special class if labels are hidden
             $hide_class = ($display_type === 'image' && $hide_labels) ? ' hide-labels-mode' : '';
             echo '<div class="linkyne-swatches-wrapper type-' . esc_attr($display_type) . $hide_class . '">';
             
@@ -113,8 +140,6 @@ function linkyne_render_options_shortcode() {
                                data-gallery=\'' . htmlspecialchars(wp_json_encode($gallery_data), ENT_QUOTES, 'UTF-8') . '\'>';
                     
                     if ( $display_type === 'image' && $swatch_img ) { echo '<img src="' . esc_url($swatch_img) . '">'; }
-                    
-                    // We print the label in the HTML, but CSS will hide it if the checkbox was checked
                     echo '<span class="swatch-label">' . esc_html($option_name) . '</span>';
                     echo '</div>';
 
@@ -123,34 +148,24 @@ function linkyne_render_options_shortcode() {
             echo '</div></div>';
         endwhile;
     endif;
-
-    // --- REPLACE EVERYTHING AT THE BOTTOM WITH THIS ---
     
-    // Create the Flexbox row wrapper
     echo '<div class="linkyne-action-row">';
-    
-    // The Price (Removed "Total:" and inline styles)
     echo '<div class="linkyne-live-price-wrapper"><span class="linkyne-live-total">' . wc_price( $product->get_price() ) . '</span></div>';
-    
-    // The Button (Added custom class, removed inline width)
     echo '<input type="hidden" name="add-to-cart" value="' . absint( $product->get_id() ) . '" />';
     echo '<button type="submit" class="single_add_to_cart_button button alt linkyne-cart-btn">Add To Cart</button>';
+    echo '</div>'; 
     
-    echo '</div>'; // End action row
-    
-    echo '</div>'; // End global options wrapper
+    echo '</div>'; 
     echo '</form>';
 
     return ob_get_clean();
 }
 
-// 3. Cart & Order Logic (Unchanged - Keeps data flowing to Checkout)
 add_filter( 'woocommerce_add_cart_item_data', 'linkyne_add_custom_options_to_cart', 10, 3 );
 function linkyne_add_custom_options_to_cart( $cart_item_data, $product_id, $variation_id ) {
     if ( isset( $_POST['linkyne_options'] ) ) {
         $cart_item_data['linkyne_custom_options'] = sanitize_post( $_POST['linkyne_options'] );
         $cart_item_data['linkyne_custom_prices'] = sanitize_post( $_POST['linkyne_prices'] );
-        
         $product = wc_get_product( $product_id );
         $base_price = (float) $product->get_price();
         $extra_cost = 0;
