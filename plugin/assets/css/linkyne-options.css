@@ -39,6 +39,9 @@
 .linkyne-swatch.swatch-image.selected {
     background-color: #eeeeee; border: 2px solid #000; 	font-weight: 500;
 }
+.linkyne-swatches-wrapper.type-image.hide-labels-mode {
+    grid-template-columns: repeat(auto-fit, minmax(calc((100% - 48px) / 5), 1fr));
+}
 
 /* 2. Button Swatch Layout */
 .linkyne-swatches-wrapper.type-button {
